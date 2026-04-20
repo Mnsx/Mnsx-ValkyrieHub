@@ -45,6 +45,16 @@ target_link_libraries(ValkyrieHub-Server
         HermesRPC
         SkuldVision
         Threads::Threads
+        mysqlclient
+)
+
+target_include_directories(ValkyrieHub-Server
+        PUBLIC
+        third_party/achilles_link/include
+        third_party/argus_log/include
+        third_party/hermes_rpc/include
+        third_party/kraken_pool/include
+        third_party/skuld_vision/include
 )
 
 message(STATUS "----------------------------------------")

@@ -11,10 +11,10 @@
 #include <mysql/mysql.h>
 #include <string>
 
-const static char * DB_URL = "localhost";       // 数据库地址
+const static char * DB_URL = "127.0.0.1";       // 数据库地址
 const static char * DB_USER = "root";           // 数据库用户名称
 const static char * DB_PASSWD = "123123";       // 数据库密码
-const static char * DB_NAME = "db_mnsx_sms";        // 数据库名称
+const static char * DB_NAME = "mnsx_valkyrie";        // 数据库名称
 const static char * DB_CHARSET = "utf8mb4";     // 数据库默认字符集
 const static int DB_RECONNECT = 1;                  // 数据库是否自动重连 1-是 0-否
 

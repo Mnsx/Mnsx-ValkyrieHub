@@ -9,6 +9,7 @@
 #include <cstring>
 
 #include "handler/ConsoleLogHandler.h"
+#include "handler/DbLogHandler.h"
 #include "handler/FileLogHandler.h"
 
 namespace mnsx {
@@ -35,6 +36,9 @@ namespace mnsx {
 
             // 添加默认处理器
             addHandler(std::make_shared<ConsoleLogHandler>());
+            // TODO 修改路径
+            addHandler(std::make_shared<FileLogHandler>("test.log"));
+            addHandler(std::make_shared<DbLogHandler>());
 
             // 创建工作线程
             worker_ = std::thread([this]() {

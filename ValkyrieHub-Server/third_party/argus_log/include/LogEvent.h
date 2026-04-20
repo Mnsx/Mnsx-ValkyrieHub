@@ -16,6 +16,7 @@ namespace mnsx {
 
         struct LogEvent {
             LogLevel level; // 日志级别
+            int node_number = 0; // 发送客户端编号
             std::string filename; // 发出日志的文件路径
             int line_number; // 发出日志的文件行数
             std::thread::id thread_id; // 发出日志的线程编号

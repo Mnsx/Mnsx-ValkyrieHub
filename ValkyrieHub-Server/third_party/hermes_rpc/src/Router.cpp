@@ -4,7 +4,7 @@
  * @date 2026/4/16
  */
 #include "../include/Router.h"
-#include "../third_party/argus_log/include/Logger.h"
+#include "Logger.h"
 
 using namespace mnsx::hermes;
 

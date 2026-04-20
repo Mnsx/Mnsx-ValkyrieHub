@@ -3,7 +3,7 @@
  * @author Mnsx_x <xx1527030652@gmail.com>
  * @date 2026/4/20
  */
-#include "MySQLUtil.h"
+#include "MySQLUtils.h"
 
 #include <iostream>
 
@@ -19,8 +19,9 @@ MySQLUtil::MySQLUtil() {
 
     if (mysql_real_connect(conn, DB_URL, DB_USER, DB_PASSWD, DB_NAME, 0, nullptr, 0) == nullptr) {
 
+        string errorMsg = mysql_error(conn);
         mysql_close(conn);
-        throw runtime_error("mysql_real_connect error");
+        throw runtime_error("mysql_real_connect error" + errorMsg);
     }
 
     mysql_set_character_set(conn, DB_CHARSET);
@@ -72,7 +73,7 @@ MySQLUtil::~MySQLUtil() {
 
 MySQLUtil & MySQLUtil::getInstance() {
 
-    static MySQLUtil instance;
+    thread_local MySQLUtil instance;
     return instance;
 }
 
