@@ -7,7 +7,7 @@
 #ifndef MNSX_VALKYRIEHUB_SERVER_DBLOGHANDLER_H
 #define MNSX_VALKYRIEHUB_SERVER_DBLOGHANDLER_H
 #include "ILogHandler.h"
-#include "../../../src/utils/MySQLUtils.h"
+#include "../../../../include/utils/MySQLUtils.h"
 
 namespace mnsx {
     namespace argus {

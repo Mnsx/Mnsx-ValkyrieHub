@@ -10,7 +10,6 @@
 #include "reactor/EventLoop.h"
 #include "net/TcpConnection.h"
 #include "TcpClient.h"
-#include "KrakenPool.h"
 
 #include <memory>
 #include <string>
@@ -25,9 +24,9 @@ namespace hermes {
     // 异步回调函数的签名
     using RpcCallback = std::function<void(const std::string& responseBody)>;
 
-    class RpcClient : public std::enable_shared_from_this<RpcClient> {
+    class RpcClient {
     public:
-        RpcClient(achilles::EventLoop* loop, kraken::KrakenPool* kraken, const std::string& server_ip, uint16_t port);
+        RpcClient(achilles::EventLoop* loop, const std::string& server_ip, uint16_t port);
 
         ~RpcClient() = default;
 
@@ -37,15 +36,13 @@ namespace hermes {
 
         void connect();
 
-        void call(const std::string& method_name, const std::string& serialized_args, RpcCallback callback);
+        void call(const std::string& method_name, const std::string& serialized_args);
 
     private:
         void onConnectionCallback(const std::shared_ptr<achilles::TcpConnection>& conn);
         void onMessageCallback(const std::shared_ptr<achilles::TcpConnection>& conn, achilles::ByteBuffer* buffer);
 
         achilles::EventLoop* loop_;
-        mnsx::kraken::KrakenPool* kraken_;
-
         std::unique_ptr<achilles::TcpClient> tcp_client_;
         std::shared_ptr<achilles::TcpConnection> connection_;
         std::mutex conn_mutex_;

@@ -55,7 +55,7 @@ namespace mnsx {
                 // 先将数据传入
                 *this << len;
                 if (len > 0) {
-                    *this << value;
+                    buffer_.append(value);
                 }
                 return *this;
             }

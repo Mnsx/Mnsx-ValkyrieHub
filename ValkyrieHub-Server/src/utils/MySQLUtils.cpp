@@ -3,7 +3,7 @@
  * @author Mnsx_x <xx1527030652@gmail.com>
  * @date 2026/4/20
  */
-#include "MySQLUtils.h"
+#include "../../include/utils/MySQLUtils.h"
 
 #include <iostream>
 
@@ -16,6 +16,9 @@ MySQLUtil::MySQLUtil() {
 
         throw runtime_error("mysql_init error");
     }
+
+    unsigned int ssl_mode = SSL_MODE_DISABLED;
+    mysql_options(conn, MYSQL_OPT_SSL_MODE, &ssl_mode);
 
     if (mysql_real_connect(conn, DB_URL, DB_USER, DB_PASSWD, DB_NAME, 0, nullptr, 0) == nullptr) {
 

@@ -35,6 +35,18 @@ add_subdirectory(third_party/skuld_vision)
 # ==================================================
 add_executable(ValkyrieHub-Server main.cpp
         src/utils/MySQLUtils.cpp
+        src/core/HubServer.cpp
+        include/core/HubServer.h
+        include/core/QtMethodDispatcher.h
+        src/core/QtMethodDispatcher.cpp
+        include/service/SystemLogService.h
+        src/service/SystemLogService.cpp
+        include/dao/SystemLogDao.h
+        src/dao/SystemLogDao.cpp
+        include/service/ClusterManageService.h
+        src/service/ClusterManageService.cpp
+        include/dao/ClusterManageDao.h
+        src/dao/ClusterManageDao.cpp
 )
 
 # 链接所有子模块到主程序
@@ -50,11 +62,13 @@ target_link_libraries(ValkyrieHub-Server
 
 target_include_directories(ValkyrieHub-Server
         PUBLIC
+        include
         third_party/achilles_link/include
         third_party/argus_log/include
         third_party/hermes_rpc/include
         third_party/kraken_pool/include
         third_party/skuld_vision/include
+        third_party/nlohmann/include
 )
 
 message(STATUS "----------------------------------------")
