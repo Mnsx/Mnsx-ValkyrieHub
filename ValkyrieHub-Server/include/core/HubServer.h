@@ -28,7 +28,12 @@ namespace mnsx {
         public:
             explicit HubServer();
             ~HubServer();
+
+            void registerCluster(std::vector<std::string> args);
         private:
+            // 解析参数
+            std::vector<std::string> getArgs(DataStream& data_stream);
+
             void startQtSocket();
 
             std::shared_ptr<RpcServer> rpc_server_; // 与集群通信的rpc服务

@@ -24,6 +24,8 @@ namespace mnsx {
 
             Json removeClusterByMac(const std::string& mac);
 
+            Json registerCluster(const std::string& mac, const std::string& ip, const std::string& node_name);
+
         private:
             ClusterManageService() = default;
             ~ClusterManageService() = default;

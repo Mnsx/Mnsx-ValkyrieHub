@@ -6,6 +6,7 @@
 #include "core/HubServer.h"
 #include "KrakenPool.h"
 #include "RpcServer.h"
+#include "service/ClusterManageService.h"
 
 using namespace mnsx::valkyrie;
 using namespace mnsx::kraken;
@@ -37,6 +38,16 @@ HubServer::HubServer() : pool_(std::make_shared<KrakenPool>()),
     // 启动HermesRpc服务端
     rpc_server_ = std::make_shared<RpcServer>(CLUSTER_PORT);
     // 注册路由方法
+    // 注册客户端注册
+    rpc_server_->getRouter().registerMethod("ClusterManage.registerCluster", [this](DataStream& data) {
+        std::vector<std::string> args = getArgs(data);
+        registerCluster(args);
+        return "";
+    });
+    rpc_server_->getRouter().registerMethod("DefectApproval.postAnomalyInfo", [this](DataStream& data) {
+        std::vector<std::string> args = getArgs(data);
+        return "";
+    });
     // 启动服务
     rpc_server_->start();
 }
@@ -45,6 +56,24 @@ HubServer::~HubServer() {
     if (qt_thread_.joinable()) {
         qt_thread_.join();
     }
+}
+
+void HubServer::registerCluster(std::vector<std::string> args) {
+    Json res = ClusterManageService::getInstance().registerCluster(args[0], args[1], args[2]);
+    qt_dispatcher_->sendToQtClient(qt_client_fd_, res);
+}
+
+std::vector<std::string> HubServer::getArgs(DataStream &data_stream) {
+
+    std::string reportData;
+    data_stream >> reportData;
+    std::vector<std::string> args;
+    std::string arg;
+    std::stringstream ss(reportData);
+    while (std::getline(ss, arg, '|')) {
+        args.push_back(arg);
+    }
+    return args;
 }
 
 void HubServer::startQtSocket() {

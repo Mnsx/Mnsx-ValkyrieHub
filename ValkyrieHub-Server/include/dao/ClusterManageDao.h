@@ -24,6 +24,12 @@ namespace mnsx {
 
             Json deleteClusterByMac(const std::string & mac);
 
+            Json addCluster(const std::string & mac, const std::string & ip, const std::string& node_name);
+
+            bool getClusterByMac(const std::string & mac);
+
+            void updateClusterStatus(int status,const std::string& max,  int deleted = 0 );
+
         private:
             ClusterManageDao() = default;
             ~ClusterManageDao() = default;

@@ -73,7 +73,7 @@ namespace mnsx {
             }
 
             DataStream& operator>>(std::string& value) {
-                uint32_t len;
+                uint32_t len = 0;
                 *this >> len; // 先读出长度
 
                 if (read_pos_ + len > buffer_.size()) {

@@ -10,21 +10,7 @@
 #include "protocol/rpc/RpcMessage.h"
 #include "../../../include/utils/NetworkDetector.h"
 
-#include <uuid/uuid.h>
-
 using namespace mnsx::hermes;
-
-std::string generateUUID() {
-    uuid_t binuuid;
-    // 生成基于随机数的 UUID (v3)
-    uuid_generate_random(binuuid);
-
-    // 转换为人类可读的字符串 (35 字符 + 1 结束符)
-    char uuid_str[36];
-    uuid_unparse_lower(binuuid, uuid_str);
-
-    return std::string(uuid_str, 8);
-}
 
 RpcClient::RpcClient(achilles::EventLoop* loop,
     const std::string& server_ip, uint16_t port) : loop_(loop) {
@@ -54,7 +40,6 @@ void RpcClient::onConnectionCallback(const std::shared_ptr<achilles::TcpConnecti
     std::string input = info.mac;
     input += "|";
     input += info.ip;
-    input += "|ValkyrieNode-" + generateUUID();
     stream << input;
     call("ClusterManage.registerCluster", stream.data(), nullptr);
 }

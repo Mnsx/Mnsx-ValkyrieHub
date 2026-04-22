@@ -33,16 +33,33 @@ add_subdirectory(third_party/skuld_vision)
 # ==================================================
 # 编译主服务端程序
 # ==================================================
-add_executable( main.cpp)
+add_executable(ValkyrieClient main.cpp
+        include/core/HubClient.h
+        src/core/HubClient.cpp
+        include/utils/NetworkDetector.h
+        include/core/process/CameraOperator.h
+        src/core/process/CameraOperator.cpp
+)
 
 # 链接所有子模块到主程序
 # 注意：因为你在子模块中巧妙地使用了 PUBLIC，
 # 这里只需要链接 HermesRPC，Achilles 和 Argus 的头文件路径就会自动传递给 MainServer
-target_link_libraries(MainServer
+target_link_libraries(ValkyrieClient
         PRIVATE
         HermesRPC
         SkuldVision
         Threads::Threads
+        uuid
+)
+
+target_include_directories(ValkyrieClient
+        PUBLIC
+        include
+        third_party/achilles_link/include
+        third_party/argus_log/include
+        third_party/hermes_rpc/include
+        third_party/kraken_pool/include
+        third_party/skuld_vision/include
 )
 
 message(STATUS "----------------------------------------")

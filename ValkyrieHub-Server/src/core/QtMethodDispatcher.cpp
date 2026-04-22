@@ -23,6 +23,7 @@ QtMethodDispatcher::QtMethodDispatcher() : qt_pool_(std::make_shared<KrakenPool>
         std::string mac = data["nodeMac"];
         return ClusterManageService::getInstance().removeClusterByMac(mac);
     };
+
 }
 
 void QtMethodDispatcher::dispatchQtTask(const std::string &json_str) {
@@ -31,11 +32,7 @@ void QtMethodDispatcher::dispatchQtTask(const std::string &json_str) {
         // 解析字符串为 JSON 对象
         Json j = Json::parse(json_str);
 
-        // TODO 清除log的影响
         std::string method_name = j["method"];
-        if (method_name == "SystemLog.getSystemLog") {
-            return;
-        }
 
         std::string type = j["type"];
         // 如果不是方法，跳出

@@ -26,9 +26,8 @@ namespace mnsx {
             void setQtFd(int qt_fd) { qt_fd_ = qt_fd; }
 
             void dispatchQtTask(const std::string& json_str);
-        private:
             bool sendToQtClient(int client_fd, const Json& response_data);
-
+        private:
             std::shared_ptr<KrakenPool> qt_pool_; // 专门处理qt的线程池
             std::unordered_map<std::string, std::function<Json(const Json&)>> router_; // 存放转发的消息
             int qt_fd_;

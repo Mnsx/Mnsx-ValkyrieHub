@@ -24,3 +24,16 @@ Json ClusterManageService::removeClusterByMac(const std::string &mac) {
     res.insert(res.begin(), type);
     return res;
 }
+
+Json ClusterManageService::registerCluster(const std::string &mac, const std::string &ip, const std::string& node_name) {
+    bool ifExist = ClusterManageDao::getInstance().getClusterByMac(mac);
+    if (ifExist == false) {
+        ClusterManageDao::getInstance().addCluster(mac, ip, node_name);
+    } else {
+        ClusterManageDao::getInstance().updateClusterStatus(1, mac);
+    }
+    Json type = {{"type", "DATA"}};
+    Json res = ClusterManageDao::getInstance().selectAll();
+    res.insert(res.begin(), type);
+    return res;
+}

@@ -53,3 +53,29 @@ Json ClusterManageDao::deleteClusterByMac(const std::string &mac) {
     MySQLUtil::getInstance().execute(sql);
     return Json::array();
 }
+
+Json ClusterManageDao::addCluster(const std::string &mac, const std::string &ip, const std::string& node_name) {
+    std::string sql = "INSERT INTO device_node (node_name, ip_address, mac_address, status) VALUES('" +
+        MySQLUtil::getInstance().escapeString(node_name) + "', '" +
+            MySQLUtil::getInstance().escapeString(ip) + "', '" +
+                MySQLUtil::getInstance().escapeString(mac) + "', " +"1);";
+
+    MySQLUtil::getInstance().execute(sql);
+    return Json::array();
+}
+
+bool ClusterManageDao::getClusterByMac(const std::string &mac) {
+    std::string sql = "SELECT * FROM device_node WHERE mac_address = '" + mac + "';";
+    MySQLResult result = MySQLUtil::getInstance().query(sql);
+    if (result.get()->row_count != 0) {
+        return true;
+    }
+    return false;
+}
+
+void ClusterManageDao::updateClusterStatus(int i, const std::string& mac, int deleted) {
+    std::string sql = "UPDATE device_node SET status = " + std::to_string(i) +
+        ", is_deleted = " + std::to_string(deleted) +
+        ", update_time = NOW() WHERE mac_address = '" + mac + "';";
+    MySQLUtil::getInstance().execute(sql);
+}

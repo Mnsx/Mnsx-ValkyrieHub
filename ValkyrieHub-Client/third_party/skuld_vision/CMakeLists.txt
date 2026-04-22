@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(Mnsx-SkuldVision LANGUAGES CXX)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mno-avx -mno-avx2")
+
 find_package(OpenCV REQUIRED)
 
 add_library(SkuldVision STATIC src/SkuldVision.cpp src/Inspector.cpp)
