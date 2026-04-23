@@ -8,7 +8,10 @@
 #include <netinet/in.h>
 
 #include "service/ClusterManageService.h"
+#include "service/DefectRecordService.h"
 #include "service/SystemLogService.h"
+#include "utils/FileUtils.h"
+#include "utils/Base64Utils.h"
 
 using namespace mnsx::valkyrie;
 
@@ -23,7 +26,19 @@ QtMethodDispatcher::QtMethodDispatcher() : qt_pool_(std::make_shared<KrakenPool>
         std::string mac = data["nodeMac"];
         return ClusterManageService::getInstance().removeClusterByMac(mac);
     };
-
+    router_["DefectRecord.getAllDetectRecord"] = [this](const Json& data) {
+        return DefectRecordService::getInstance().getAllDetectRecord();
+    };
+    router_["DetectRecord.getRecordFromPath"] = [this](const Json& data) {
+        std::vector<unsigned char> img_bytes = readImageFromDisk(data["path"]);
+        std::string base64_str = base64_encode(img_bytes.data(), img_bytes.size());
+        Json result_array = Json::array();
+        Json res = {{"img", base64_str}};
+        result_array.push_back(res);
+        Json type = {{"type", "IMAGE"}};
+        result_array.insert(result_array.begin(), type);
+        return result_array;
+    };
 }
 
 void QtMethodDispatcher::dispatchQtTask(const std::string &json_str) {

@@ -21,7 +21,7 @@ namespace mnsx {
         class ByteBuffer {
         public:
             constexpr static const size_t PREPEND = 16; // 初始预留头部空间，方便协议头打包
-            constexpr static const size_t INITIAL_SIZE = 1024; // 初始缓冲区大小 1KB
+            constexpr static const size_t INITIAL_SIZE = 1024 * 1024 * 3; // 初始缓冲区大小 1KB
 
             /**
              * @brief 构造函数

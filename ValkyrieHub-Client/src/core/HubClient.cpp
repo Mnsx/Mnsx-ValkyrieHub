@@ -26,7 +26,7 @@ HubClient::HubClient() : operator_(nullptr) {
     // 启动图片处理器
     operator_ = CameraOperator(client);
     // TODO 传感器触发
-    DataStream res = operator_.process();
+    operator_.process();
     // io线程阻塞
     io_thread.join();
 }

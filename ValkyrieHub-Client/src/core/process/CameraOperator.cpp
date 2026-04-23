@@ -112,15 +112,15 @@ DataStream CameraOperator::sendBadImageData(cv::Mat mat, InspectResult &res) {
     // 将 Mat 转换为 JPG 字节流，存入 vector
     cv::imencode(".jpg", mat, buf, params);
     // 准备数据
-    DataStream res_data_stream = DataStream("");
+    std::shared_ptr<DataStream> res_data_stream = std::make_shared<DataStream>("");
     // 准备标识符Mac地址
     NodeNetworkInfo info = NetworkDetector::getPrimaryNetworkInfo();
     std::string anomalyInfo = std::to_string(res.anomalyCount) + "|" + serializeRects(res.anomalyRects) + "|" + serializeTypes(res.anomalyTypes);
     // 将 byte 数组转为 string 容器，完美塞入 DataStream
     std::string image_bytes(buf.begin(), buf.end());
-    std::string res_info = info.mac + "|" + anomalyInfo + "|" + image_bytes;
-    res_data_stream << res_info;
-    rpc_client_->call("DefectApproval.postAnomalyInfo", res_data_stream.data(), nullptr);
+    std::string res_info = info.mac + "|" + anomalyInfo;
+    *(res_data_stream.get()) << res_info << image_bytes;
+    rpc_client_->call("DefectApproval.postAnomalyInfo", res_data_stream.get()->data(), nullptr);
 
-    return res_data_stream;
+    return *(res_data_stream.get());
 }

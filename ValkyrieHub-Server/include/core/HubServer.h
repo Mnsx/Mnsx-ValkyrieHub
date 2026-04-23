@@ -30,6 +30,10 @@ namespace mnsx {
             ~HubServer();
 
             void registerCluster(std::vector<std::string> args);
+
+            std::vector<std::string> getImageArgs(DataStream &data_stream);
+
+            void doImageTask(std::vector<std::string> args);
         private:
             // 解析参数
             std::vector<std::string> getArgs(DataStream& data_stream);
@@ -38,6 +42,8 @@ namespace mnsx {
 
             std::shared_ptr<RpcServer> rpc_server_; // 与集群通信的rpc服务
             std::shared_ptr<KrakenPool> pool_; // 处理任务的线程池
+
+            // 图片处理任务
 
             // Qt
             std::thread qt_thread_; // 与Qt通信的线程

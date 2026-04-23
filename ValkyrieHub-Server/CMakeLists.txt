@@ -47,6 +47,12 @@ add_executable(ValkyrieHub-Server main.cpp
         src/service/ClusterManageService.cpp
         include/dao/ClusterManageDao.h
         src/dao/ClusterManageDao.cpp
+        include/service/DefectRecordService.h
+        src/service/DefectRecordService.cpp
+        include/dao/DefectRecordDao.h
+        src/dao/DefectRecordDao.cpp
+        include/utils/Base64Utils.h
+        include/utils/FileUtils.h
 )
 
 # 链接所有子模块到主程序
