@@ -26,7 +26,10 @@ HubClient::HubClient() : operator_(nullptr) {
     // 启动图片处理器
     operator_ = CameraOperator(client);
     // TODO 传感器触发
-    operator_.process();
+    for (int i = 0; i < 5; ++i) {
+        operator_.process();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
     // io线程阻塞
     io_thread.join();
 }

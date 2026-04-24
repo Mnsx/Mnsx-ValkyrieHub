@@ -24,10 +24,10 @@ namespace mnsx {
 
         enum class AnomalyType {
             NONE = 0, // 无异常
-            BLOB, // 斑块/污点
-            EDGE_BREAK, // 边缘断裂
-            LINE_SCRATCH, // 线条状划痕
-            SHAPE_MISMATCH // 形状轮廓不匹配
+            BLOB = 1, // 斑块/污点
+            EDGE_BREAK = 2, // 边缘断裂
+            LINE_SCRATCH = 3, // 线条状划痕
+            SHAPE_MISMATCH = 4 // 形状轮廓不匹配
         };
 
         struct InspectResult {

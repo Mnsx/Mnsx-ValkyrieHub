@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 
 #include "service/ClusterManageService.h"
+#include "service/DataReportService.h"
 #include "service/DefectRecordService.h"
 #include "service/SystemLogService.h"
 #include "utils/FileUtils.h"
@@ -38,6 +39,12 @@ QtMethodDispatcher::QtMethodDispatcher() : qt_pool_(std::make_shared<KrakenPool>
         Json type = {{"type", "IMAGE"}};
         result_array.insert(result_array.begin(), type);
         return result_array;
+    };
+    router_["DataReport.getRealtimeYield"] = [this](const Json& data) {
+        return DataReportService::getInstance().getRealtimeYield();
+    };
+    router_["DataReport.falsePositiveRateWeekly"] = [this](const Json& data) {
+        return DataReportService::getInstance().falsePostitiveRateWeekly();
     };
 }
 

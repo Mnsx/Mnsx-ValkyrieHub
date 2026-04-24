@@ -53,6 +53,8 @@ add_executable(ValkyrieHub-Server main.cpp
         src/dao/DefectRecordDao.cpp
         include/utils/Base64Utils.h
         include/utils/FileUtils.h
+        include/service/DataReportService.h
+        src/service/DataReportService.cpp
 )
 
 # 链接所有子模块到主程序

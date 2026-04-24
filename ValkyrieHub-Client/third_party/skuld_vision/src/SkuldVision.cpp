@@ -6,6 +6,7 @@
 #include "SkuldVision.h"
 #include "Inspector.h"
 #include <exception>
+#include <random>
 
 using namespace mnsx::skuld;
 
@@ -49,7 +50,11 @@ InspectResult SkuldVision::process(const cv::Mat &inputImage, uint64_t contextTa
         if (result.anomalyCount > 0) {
             result.passed = false;
             // TODO 设置不同的异常
-            result.anomalyTypes.assign(result.anomalyCount, AnomalyType::BLOB);
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> dis(0, 4);
+            int random_num = dis(gen);
+            result.anomalyTypes.assign(result.anomalyCount, static_cast<AnomalyType>(random_num));
         } else {
             result.passed = true;
         }

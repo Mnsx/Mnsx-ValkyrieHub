@@ -55,6 +55,10 @@ Json ClusterManageDao::deleteClusterByMac(const std::string &mac) {
 }
 
 Json ClusterManageDao::addCluster(const std::string &mac, const std::string &ip, const std::string& node_name) {
+    // TODO　模拟数据
+    std::string add = "UPDATE total_productions SET count = count + 5 WHERE id = 1";
+    MySQLUtil::getInstance().execute(add);
+
     std::string sql = "INSERT INTO device_node (node_name, ip_address, mac_address, status) VALUES('" +
         MySQLUtil::getInstance().escapeString(node_name) + "', '" +
             MySQLUtil::getInstance().escapeString(ip) + "', '" +
@@ -74,6 +78,10 @@ bool ClusterManageDao::getClusterByMac(const std::string &mac) {
 }
 
 void ClusterManageDao::updateClusterStatus(int i, const std::string& mac, int deleted) {
+    // TODO　模拟数据
+    std::string add = "UPDATE total_productions SET count = count + 5 WHERE id = 1";
+    MySQLUtil::getInstance().execute(add);
+
     std::string sql = "UPDATE device_node SET status = " + std::to_string(i) +
         ", is_deleted = " + std::to_string(deleted) +
         ", update_time = NOW() WHERE mac_address = '" + mac + "';";
