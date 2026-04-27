@@ -73,6 +73,10 @@ DataStream CameraOperator::process() {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
+    // TODO 模拟数据
+    // std::string mockImagePath = "./static/mock_defect_03.jpg";
+    // cv::Mat frame = cv::imread(mockImagePath, cv::IMREAD_COLOR);
+
     // 将图片任务投入线程池中进行分析
     if (!frame.empty()) {
         pool_->enqueue([this, frame]() {

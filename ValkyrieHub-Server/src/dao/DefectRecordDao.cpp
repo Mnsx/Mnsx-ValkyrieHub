@@ -26,3 +26,8 @@ bool DefectRecordDao::insertDefectRecord(std::vector<std::string> params) {
 Json DefectRecordDao::selectAll() {
 
 }
+
+void DefectRecordDao::updateRecordStatus(const std::string &flag, const std::string &string) {
+    std::string sql = "UPDATE defect_record SET review_status = " + flag + " WHERE image_path = '" + string + "';";
+    MySQLUtil::getInstance().execute(sql);
+}

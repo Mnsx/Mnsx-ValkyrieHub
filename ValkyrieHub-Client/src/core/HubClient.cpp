@@ -5,6 +5,8 @@
  * @description 
  */
 #include "core/HubClient.h"
+
+#include "Inspector.h"
 #include "reactor/EventLoop.h"
 #include "RpcClient.h"
 
@@ -23,6 +25,8 @@ HubClient::HubClient() : operator_(nullptr) {
     });
     // 客户端连接
     client->connect();
+    // 启动AI大模型
+    Inspector::initAIEngine("best.onnx");
     // 启动图片处理器
     operator_ = CameraOperator(client);
     // TODO 传感器触发

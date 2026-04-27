@@ -1,48 +1,29 @@
-/** 
- * @file Inspector.h
- * @author Mnsx_x <xx1527030652@gmail.com>
- * @date 2026/4/15
- * @description 视觉检验算子核心实现
- */
-#ifndef MNSX_SKULDVISION_INSPECTOR_H
-#define MNSX_SKULDVISION_INSPECTOR_H
-
-#include <opencv2/core.hpp>
+#pragma once
+#include <opencv2/opencv.hpp>
+#include <onnxruntime_cxx_api.h>
+#include <vector>
+#include <string>
+#include <memory>
 
 namespace mnsx {
     namespace skuld {
 
         class Inspector {
         public:
-            /**
-             * @brief 灰度化与去噪
-             * @param src 输入的原始 BGR 图像
-             * @return 降噪后的灰度图
-             */
-            static cv::Mat preprocess(const cv::Mat& src);
+            static bool initAIEngine(const std::string& onnxPath);
+            static void extractAnomaliesYOLO(const cv::Mat& src,
+                                             std::vector<cv::Rect>& outRects,
+                                             std::vector<int>& outClassIds,
+                                             float confThreshold = 0.5f);
 
-            /**
-             * @brief 图像分割
-             * @param gray 预处理后的灰度图
-             * @return 二值图
-             */
-            static cv::Mat segment(const cv::Mat& gray);
+        private:
+            static bool isAiLoaded_;
 
-            /**
-             * @brief 特征提取
-             * @param binary 二值图
-             * @param minArea 最小面积阈值（过滤噪点）
-             * @return 异常区域的矩形集合
-             */
-            static std::vector<cv::Rect> extractAnomalies(const cv::Mat& binary, double minArea = 50.0);
-
-            /**
-             * @brief 连接断裂的划痕或消除细小噪点
-             */
-            static cv::Mat morphologicalOptimize(const cv::Mat& binary);
+            // 使用 C++11 标准的 unique_ptr
+            static std::unique_ptr<Ort::Env> env_;
+            static std::unique_ptr<Ort::Session> session_;
+            static Ort::MemoryInfo memoryInfo_;
         };
 
-    }
-}
-
-#endif //MNSX_SKULDVISION_INSPECTOR_H
+    } // namespace skuld
+} // namespace mnsx

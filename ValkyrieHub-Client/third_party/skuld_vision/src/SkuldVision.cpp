@@ -1,11 +1,12 @@
 /**
- * @file SkuldVision.cpp
+* @file SkuldVision.cpp
  * @author Mnsx_x <xx1527030652@gmail.com>
  * @date 2026/4/15
  */
 #include "SkuldVision.h"
 #include "Inspector.h"
 #include <exception>
+#include <iostream>
 #include <random>
 
 using namespace mnsx::skuld;
@@ -17,32 +18,23 @@ void SkuldVision::setConfig(const Config& config) {
 InspectResult SkuldVision::process(const cv::Mat &inputImage, uint64_t contextTag) {
     InspectResult result;
     result.contextTag = contextTag;
+    result.passed = true; // 默认通过
 
-    // 拦截空白图片
     if (inputImage.empty()) {
         result.passed = false;
         result.status = SkuldStatus::ERR_EMPTY_INPUT;
         return result;
     }
 
-    // 启动高精度计时器
     int64 startTick = cv::getTickCount();
 
     try {
-        // 预处理
-        cv::Mat gray = Inspector::preprocess(inputImage);
+        std::vector<cv::Rect> anomalies;
+        std::vector<int> anomalyClassIds;
 
-        // 二值化
-        cv::Mat binary = Inspector::segment(gray);
-
-        // 形态学优化
-        cv::Mat optimized = binary;
-        if (config_.enableMorphology) {
-            optimized = Inspector::morphologicalOptimize(binary);
-        }
-
-        // 特征提取
-        std::vector<cv::Rect> anomalies = Inspector::extractAnomalies(optimized, config_.minAnomalyArea);
+        // 🌟 调用真正的 AI 推理
+        // 指挥官建议：如果是 3 轮训练的模型，请把 0.5f 改为 0.85f 以过滤杂波
+        Inspector::extractAnomaliesYOLO(inputImage, anomalies, anomalyClassIds, 0.25f);
 
         result.anomalyCount = anomalies.size();
         result.anomalyRects = anomalies;
@@ -61,20 +53,17 @@ InspectResult SkuldVision::process(const cv::Mat &inputImage, uint64_t contextTa
 
         result.status = SkuldStatus::SUCCESS;
 
-    } catch (const cv::Exception& e) {
-        result.passed = false;
-        result.status = SkuldStatus::ERR_ALGORITHM_EXCEPTION;
     } catch (const std::exception& e) {
         result.passed = false;
         result.status = SkuldStatus::ERR_ALGORITHM_EXCEPTION;
+        std::cerr << "💥 Skuld 引擎异常: " << e.what() << std::endl;
     } catch (...) {
         result.passed = false;
         result.status = SkuldStatus::ERR_ALGORITHM_EXCEPTION;
     }
 
     int64 endTick = cv::getTickCount();
-    double freq = cv::getTickFrequency();
-    result.processTimeMs = ((endTick - startTick) / freq) * 1000.0;
+    result.processTimeMs = ((endTick - startTick) / cv::getTickFrequency()) * 1000.0;
 
     return result;
 }

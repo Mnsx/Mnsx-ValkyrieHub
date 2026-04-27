@@ -260,7 +260,29 @@ void HubServer::doImageTask(std::vector<std::string> args) {
     if (addSuccess == true) {
         // 将缩略图和瑕疵数据发送到Qt端
         std::vector<uchar> thumb_buf;
-        cv::imencode(".jpg", img_buf, thumb_buf, thumb_params);
+        try {
+            // 1. 提前校验输入
+            if (img_buf.empty()) {
+                LOG_ERROR << "输入图像为空，跳过编码";
+                return;
+            }
+
+            // 2. 执行编码
+            bool success = cv::imencode(".jpg", img_buf, thumb_buf, thumb_params);
+            if (!success) {
+                LOG_WARN << "imencode 返回 false，编码失败但未抛出异常";
+            }
+        }
+        // 3. 改为按常量引用捕获，并优先捕获 cv::Exception
+        catch (const cv::Exception& e) {
+            LOG_ERROR << "OpenCV 异常: " << e.what();
+        }
+        catch (const std::exception& e) {
+            LOG_ERROR << "标准异常: " << e.what();
+        }
+        catch (...) {
+            LOG_ERROR << "未知崩溃";
+        }
         Json result_array = Json::array();
         Json json_obj = {
             {"mac", mac_addr}, {"count", anomaly_count}, {"rects", anomaly_rects},

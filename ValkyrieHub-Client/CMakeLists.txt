@@ -29,6 +29,7 @@ add_subdirectory(third_party/hermes_rpc)
 
 # 4. 独立的视觉处理模块
 add_subdirectory(third_party/skuld_vision)
+set(ORT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/onnx")
 
 # ==================================================
 # 编译主服务端程序
@@ -41,6 +42,8 @@ add_executable(ValkyrieClient main.cpp
         src/core/process/CameraOperator.cpp
 )
 
+target_link_directories(ValkyrieClient PRIVATE third_party/onnx/lib)
+
 # 链接所有子模块到主程序
 # 注意：因为你在子模块中巧妙地使用了 PUBLIC，
 # 这里只需要链接 HermesRPC，Achilles 和 Argus 的头文件路径就会自动传递给 MainServer
@@ -50,18 +53,16 @@ target_link_libraries(ValkyrieClient
         SkuldVision
         Threads::Threads
         uuid
+        onnxruntime
 )
 
 target_include_directories(ValkyrieClient
         PUBLIC
         include
+        third_party/onnx/include
         third_party/achilles_link/include
         third_party/argus_log/include
         third_party/hermes_rpc/include
         third_party/kraken_pool/include
         third_party/skuld_vision/include
 )
-
-message(STATUS "----------------------------------------")
-message(STATUS "Mnsx V CMake 组装完毕")
-message(STATUS "----------------------------------------")

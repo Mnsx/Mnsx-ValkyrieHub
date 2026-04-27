@@ -26,6 +26,7 @@ namespace mnsx {
 
             Json getAllDetectRecord();
 
+            void modifyRecordStatus(std::string flag, std::string filePath);
         private:
             DefectRecordService() = default;
             ~DefectRecordService() = default;

@@ -1,69 +1,177 @@
-/**
- * @file Inspector.cpp
- * @author Mnsx_x <xx1527030652@gmail.com>
- * @date 2026/4/15
- */
 #include "Inspector.h"
-#include <opencv2/imgproc.hpp>
+#include <iostream>
 
 using namespace mnsx::skuld;
 
-cv::Mat Inspector::preprocess(const cv::Mat& src) {
-    cv::Mat gray, blurred;
+// 静态成员初始化
+bool Inspector::isAiLoaded_ = false;
+std::unique_ptr<Ort::Env> Inspector::env_ = nullptr;
+std::unique_ptr<Ort::Session> Inspector::session_ = nullptr;
+Ort::MemoryInfo Inspector::memoryInfo_ = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
 
-    // 将图片转换为灰度图
-    if (src.channels() == 3) {
-        cv::cvtColor(src, gray, cv::COLOR_BGR2GRAY);
-    } else {
-        gray = src.clone();
+bool Inspector::initAIEngine(const std::string& onnxPath) {
+    try {
+        env_.reset(new Ort::Env(ORT_LOGGING_LEVEL_WARNING, "SkuldVision"));
+        Ort::SessionOptions sessionOptions;
+        sessionOptions.SetIntraOpNumThreads(2); // 增加到 2 线程，提升工控机性能
+        sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
+
+#ifdef _WIN32
+        std::wstring wPath(onnxPath.begin(), onnxPath.end());
+        session_.reset(new Ort::Session(*env_, wPath.c_str(), sessionOptions));
+#else
+        session_.reset(new Ort::Session(*env_, onnxPath.c_str(), sessionOptions));
+#endif
+        isAiLoaded_ = true;
+        std::cout << "✅ Skuld 神经网络已就绪 (ORT 引擎)" << std::endl;
+        return true;
+    } catch (const std::exception& e) {
+        std::cerr << "❌ 引擎装载失败: " << e.what() << std::endl;
+        return false;
     }
-
-    // 高斯滤波，内核数位5x5，高斯值设置0，由OpenCV测试
-    cv::GaussianBlur(gray, blurred, cv::Size(5, 5), 0);
-
-    return blurred;
 }
 
-cv::Mat Inspector::segment(const cv::Mat& gray) {
-    cv::Mat binary;
+void Inspector::extractAnomaliesYOLO(const cv::Mat& src,
+                                     std::vector<cv::Rect>& outRects,
+                                     std::vector<int>& outClassIds,
+                                     float confThreshold) {
+    outRects.clear();
+    outClassIds.clear();
 
-    // 使用大津法自动寻找最佳阈值，并进行反二进制阈值化
-    cv::threshold(gray, binary, 0, 255, cv::THRESH_BINARY_INV | cv::THRESH_OTSU);
+    if (!isAiLoaded_ || src.empty()) return;
 
-    return binary;
-}
+    // =========================
+    // 1. LetterBox 预处理
+    // =========================
+    struct LetterBoxInfo {
+        float scale;
+        int pad_w;
+        int pad_h;
+    } lb;
 
-cv::Mat Inspector::morphologicalOptimize(const cv::Mat& binary) {
-    cv::Mat optimized;
+    int target = 640;
+    int w = src.cols;
+    int h = src.rows;
 
-    // 创建一个3x3的矩形
-    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+    float scale = std::min(target / (float)w, target / (float)h);
+    int new_w = int(w * scale);
+    int new_h = int(h * scale);
 
-    // 闭运算
-    cv::morphologyEx(binary, optimized, cv::MORPH_CLOSE, kernel);
+    cv::Mat resized;
+    cv::resize(src, resized, cv::Size(new_w, new_h));
 
-    return optimized;
-}
+    int pad_w = target - new_w;
+    int pad_h = target - new_h;
 
-std::vector<cv::Rect> Inspector::extractAnomalies(const cv::Mat& binary, double minArea) {
-    std::vector<cv::Rect> anomalyRects;
-    std::vector<std::vector<cv::Point>> contours;
+    int top = pad_h / 2;
+    int left = pad_w / 2;
 
-    // 提取最外层轮廓
-    cv::findContours(binary, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+    cv::Mat inputImg;
+    cv::copyMakeBorder(resized, inputImg,
+                       top, pad_h - top,
+                       left, pad_w - left,
+                       cv::BORDER_CONSTANT,
+                       cv::Scalar(114, 114, 114));
 
-    // 遍历所有找到的轮廓
-    for (const auto& contour : contours) {
-        // 计算轮廓的实际像素面积
-        double area = cv::contourArea(contour);
+    lb.scale = scale;
+    lb.pad_w = left;
+    lb.pad_h = top;
 
-        // 过滤掉面积小于阈值的图形
-        if (area > minArea) {
-            // 计算并保存该轮廓的最小正外接矩形
-            cv::Rect boundingBox = cv::boundingRect(contour);
-            anomalyRects.push_back(boundingBox);
+    // =========================
+    // 2. 转 blob
+    // =========================
+    cv::Mat blob;
+    cv::dnn::blobFromImage(inputImg, blob, 1.0 / 255.0,
+                           cv::Size(640, 640),
+                           cv::Scalar(), true, false);
+
+    size_t inputTensorSize = 1 * 3 * 640 * 640;
+    std::vector<int64_t> inputDims = {1, 3, 640, 640};
+
+    Ort::Value inputTensor = Ort::Value::CreateTensor<float>(
+        memoryInfo_, (float*)blob.data, inputTensorSize,
+        inputDims.data(), inputDims.size());
+
+    const char* inputNames[] = {"images"};
+    const char* outputNames[] = {"output0"};
+
+    // =========================
+    // 3. 推理
+    // =========================
+    auto outputTensors = session_->Run(
+        Ort::RunOptions{nullptr},
+        inputNames, &inputTensor, 1,
+        outputNames, 1);
+
+    float* rawData = outputTensors[0].GetTensorMutableData<float>();
+
+    // shape: [1, 84, 8400]
+    int num_channels = 84;
+    int num_preds = 8400;
+
+    float x_factor = 1.0f / lb.scale;
+    float y_factor = 1.0f / lb.scale;
+
+    std::vector<cv::Rect> boxes;
+    std::vector<float> confidences;
+    std::vector<int> classIds;
+
+    // =========================
+    // 4. 正确解析（CHW）
+    // =========================
+    for (int i = 0; i < num_preds; ++i) {
+
+        float cx = rawData[0 * num_preds + i];
+        float cy = rawData[1 * num_preds + i];
+        float w  = rawData[2 * num_preds + i];
+        float h  = rawData[3 * num_preds + i];
+
+        float maxScore = 0.0f;
+        int classId = -1;
+
+        for (int c = 4; c < num_channels; ++c) {
+
+            float raw = rawData[c * num_preds + i];
+
+            // 🔥 加 sigmoid
+            float score = rawData[c * num_preds + i];
+
+            if (score > maxScore) {
+                maxScore = score;
+                classId = c - 4;
+            }
+        }
+
+        std::cout << "msxScore: " << maxScore << std::endl;
+        if (maxScore > confThreshold) {
+
+            float x = cx - 0.5f * w;
+            float y = cy - 0.5f * h;
+
+            // 去 padding
+            x -= lb.pad_w;
+            y -= lb.pad_h;
+
+            // 还原
+            x *= x_factor;
+            y *= y_factor;
+            w *= x_factor;
+            h *= y_factor;
+
+            boxes.emplace_back((int)x, (int)y, (int)w, (int)h);
+            confidences.emplace_back(maxScore);
+            classIds.emplace_back(classId);
         }
     }
 
-    return anomalyRects;
+    // =========================
+    // 5. NMS
+    // =========================
+    std::vector<int> indices;
+    cv::dnn::NMSBoxes(boxes, confidences, confThreshold, 0.45f, indices);
+
+    for (int idx : indices) {
+        outRects.push_back(boxes[idx]);
+        outClassIds.push_back(classIds[idx]);
+    }
 }

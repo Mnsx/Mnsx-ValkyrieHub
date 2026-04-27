@@ -17,3 +17,7 @@ bool DefectRecordService::addNewDefectRecord(std::vector<std::string> params) {
 Json DefectRecordService::getAllDetectRecord() {
     return Json();
 }
+
+void DefectRecordService::modifyRecordStatus(std::string flag, std::string filePath) {
+    return DefectRecordDao::getInstance().updateRecordStatus(flag, filePath);
+}

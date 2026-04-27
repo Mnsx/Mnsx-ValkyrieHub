@@ -26,6 +26,8 @@ namespace mnsx {
 
             Json selectAll();
 
+            void updateRecordStatus(const std::string & flag, const std::string & string);
+
         private:
             DefectRecordDao() = default;
             ~DefectRecordDao() = default;

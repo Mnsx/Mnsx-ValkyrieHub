@@ -17,7 +17,7 @@ Json DataReportService::getRealtimeYield() {
     MYSQL_ROW row = mysql_fetch_row(res.get());
     int total_count = std::stoi(row[0]);
     // 统计异常产品总数
-    sql = "SELECT COUNT(*) FROM defect_record WHERE review_status != 2;";
+        sql = "SELECT COUNT(*) FROM defect_record WHERE review_status != 2;";
     res = MySQLUtil::getInstance().query(sql);
     row = mysql_fetch_row(res.get());
     int total_detect_count = std::stoi(row[0]);

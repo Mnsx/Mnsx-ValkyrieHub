@@ -46,6 +46,15 @@ QtMethodDispatcher::QtMethodDispatcher() : qt_pool_(std::make_shared<KrakenPool>
     router_["DataReport.falsePositiveRateWeekly"] = [this](const Json& data) {
         return DataReportService::getInstance().falsePostitiveRateWeekly();
     };
+    router_["DetectRecord.modifyRecordStatus"] = [this](const Json& data) {
+
+        DefectRecordService::getInstance().modifyRecordStatus(data["flag"], data["filePath"]);
+        Json result_array = Json::array();
+        result_array.push_back({{"res", ""}});
+        Json type = {{"type", "STATUS"}};
+        result_array.insert(result_array.begin(), type);
+        return result_array;
+    };
 }
 
 void QtMethodDispatcher::dispatchQtTask(const std::string &json_str) {
@@ -88,7 +97,16 @@ bool QtMethodDispatcher::sendToQtClient(int client_fd, const Json &response_data
         LOG_WARN << "无效的客户端 FD，放弃发送";
         return false;
     }
-    std::string json_str = response_data.dump();
+    std::string json_str;
+    try {
+        json_str = response_data.dump();
+    } catch (const std::exception& e) {
+        LOG_ERROR << "JSON dump 抛出异常: " << e.what();
+        return false; // 或者抛出到上层
+    } catch (...) {
+        LOG_ERROR << "JSON dump 抛出未知异常";
+        return false;
+    }
 
     // 计算文本呢长度
     uint32_t body_len = json_str.size();
