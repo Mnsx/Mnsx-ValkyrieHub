@@ -53,7 +53,7 @@ QtMethodDispatcher::QtMethodDispatcher() : qt_pool_(std::make_shared<KrakenPool>
         result_array.push_back({{"res", ""}});
         Json type = {{"type", "STATUS"}};
         result_array.insert(result_array.begin(), type);
-        return result_array;
+        return DataReportService::getInstance().falsePostitiveRateWeekly();
     };
 }
 

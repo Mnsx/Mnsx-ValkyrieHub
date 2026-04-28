@@ -49,33 +49,33 @@ std::string serializeTypes(const std::vector<AnomalyType>& types) {
 DataStream CameraOperator::process() {
     // 拍摄产品照片
     // 通过Opencv打开摄像头
-    cv::VideoCapture cap;
-    int deviceID = 0;
-    int apiID = cv::CAP_V4L2;
-    cap.open(deviceID, apiID);
-    if (!cap.isOpened()) {
-        cap.open(1, apiID); // 尝试备用通道
-    }
-    if (!cap.isOpened()) {
-    }
-    // 防止超时
-    cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
-    cap.set(cv::CAP_PROP_FRAME_WIDTH, 640);
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
-    cap.set(cv::CAP_PROP_FPS, 30);
-    // 将摄像头的一帧画像保存到Mat中
-    cv::Mat frame;
-    for (int i = 0; i < 10; ++i) {
-        cap >> frame;
-        if (!frame.empty()) {
-            break; // 成功抓到画面，立刻跳出循环
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
+    // cv::VideoCapture cap;
+    // int deviceID = 0;
+    // int apiID = cv::CAP_V4L2;
+    // cap.open(deviceID, apiID);
+    // if (!cap.isOpened()) {
+    //     cap.open(1, apiID); // 尝试备用通道
+    // }
+    // if (!cap.isOpened()) {
+    // }
+    // // 防止超时
+    // cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+    // cap.set(cv::CAP_PROP_FRAME_WIDTH, 640);
+    // cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
+    // cap.set(cv::CAP_PROP_FPS, 30);
+    // // 将摄像头的一帧画像保存到Mat中
+    // cv::Mat frame;
+    // for (int i = 0; i < 10; ++i) {
+    //     cap >> frame;
+    //     if (!frame.empty()) {
+    //         break; // 成功抓到画面，立刻跳出循环
+    //     }
+    //     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    // }
 
     // TODO 模拟数据
-    // std::string mockImagePath = "./static/mock_defect_03.jpg";
-    // cv::Mat frame = cv::imread(mockImagePath, cv::IMREAD_COLOR);
+    std::string mockImagePath = "./static/mock_defect_03.jpg";
+    cv::Mat frame = cv::imread(mockImagePath, cv::IMREAD_COLOR);
 
     // 将图片任务投入线程池中进行分析
     if (!frame.empty()) {

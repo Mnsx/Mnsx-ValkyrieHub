@@ -32,8 +32,6 @@ InspectResult SkuldVision::process(const cv::Mat &inputImage, uint64_t contextTa
         std::vector<cv::Rect> anomalies;
         std::vector<int> anomalyClassIds;
 
-        // 🌟 调用真正的 AI 推理
-        // 指挥官建议：如果是 3 轮训练的模型，请把 0.5f 改为 0.85f 以过滤杂波
         Inspector::extractAnomaliesYOLO(inputImage, anomalies, anomalyClassIds, 0.25f);
 
         result.anomalyCount = anomalies.size();
